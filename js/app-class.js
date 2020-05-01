@@ -1,10 +1,11 @@
 //constructor 
-function Seguro(marca, anio, tipo){
-	this.marca = marca;
-	this.anio = anio;
-	this.tipo = tipo;
-}
-Seguro.prototype.cotizarSeguro = function(){
+class Seguro{
+	constructor(marca, anio, tipo){
+		this.marca = marca;
+		this.anio = anio;
+		this.tipo = tipo;
+	}
+cotizarSeguro(){
 	let precio;
 	const precioBase = 2000;
 	//El seguro se cotiza teniendo en cuenta la marca
@@ -25,10 +26,12 @@ Seguro.prototype.cotizarSeguro = function(){
 		precio *= 1.50;
 	}
 	return precio;
+	}	
 }
+
 //todo lo que visualiza el usuario
-function Interfaz(){
-	Interfaz.prototype.mensajeError = function(mensaje, tipo){
+class Interfaz{
+	mostrarMensaje(mensaje, tipo){
 		const div = document.createElement('div');
 		if(tipo === 'error'){
 			div.classList.add('mensaje', 'error');
@@ -42,7 +45,33 @@ function Interfaz(){
 			document.querySelector('.mensaje').remove();
 		}, 3000);
 	}
-
+	mostrarResultado(seguro, precioFinal){
+		const resultado = document.getElementById('resultado');
+		let marca;
+		switch(seguro.marca){
+			case '1': marca = 'Americano';
+			break;
+			case '2': marca = 'Asiático';
+			break;
+			case '3': marca = 'Europeo';
+			break;
+		}
+		let precio = precioFinal;
+		const div = document.createElement('div');
+		div.innerHTML = `
+			<p class='header'>Resumen cotización:</p>
+			<p>Marca: ${marca}</p>
+			<p>Año: ${seguro.anio}</p>
+			<p>Tipo: ${seguro.tipo}</p>
+			<p>Precio: $ ${precio}</p>
+		`;
+		const spinnerGif = document.querySelector('#cargando img');
+		spinnerGif.style.display = 'block';
+		setTimeout(function(){
+			spinnerGif.style.display = 'none';
+			resultado.appendChild(div);
+		}, 3000);
+	}
 }
 //EventListener
 const formulario = document.getElementById('cotizar-seguro');
@@ -60,15 +89,19 @@ formulario.addEventListener('submit', function(event){
 	const interfaz = new Interfaz();
 	//validar que los campos no esten vacios
 	if(marcaSelect === '' || anioSelect === '' || tipoSeguro === ''){
-		interfaz.mensajeError('Faltan datos por completar, por favor revisar!', 'error');
+		interfaz.mostrarMensaje('Faltan datos por completar, por favor revisar!', 'error');
 	}else{
+		//limpio los resultados previos 
+		const resultado = document.querySelector('#resultado div');
+		if(resultado != null){
+			resultado.remove();
+		}
 		const seguro = new Seguro(marcaSelect, anioSelect, tipoSeguro);
-		const cantidad = seguro.cotizarSeguro(seguro);
+		const precio = seguro.cotizarSeguro(seguro);
+		// llamado al proto para para visualizar reultado
+		interfaz.mostrarResultado(seguro, precio);
+		interfaz.mostrarMensaje('Cotizando...', 'exito');
 	}
-		
-
-
-	
 });
 
 const anioMax = new Date().getFullYear(), //limita la variable max al año en curso
